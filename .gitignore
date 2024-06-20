@@ -89,6 +89,9 @@ celerybeat.pid
 src/data/*
 base_urls/*
 data/profile_data/*
+data/es_profile_urls/*
+data/es_profile_data/*
+data/es_profile_endpoints/*
 data/profile_endpoints/*
 src/logs/*
 

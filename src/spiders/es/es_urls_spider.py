@@ -1,10 +1,8 @@
 import asyncio
 from pathlib import Path
-import re, random, csv, json
+import re, random, csv
 from src.utils.task_utils.loader import emulator
-from urllib.parse import urljoin, urlparse
 from playwright_stealth import stealth_async
-from src.utils.task_utils.utilities import randomize_timeout
 from playwright.async_api import async_playwright, Error as PlaywrightError
 from middlewares.errors.error_handler import handle_exceptions
 from src.utils.logger.logger import custom_logger, initialize_logging
@@ -15,9 +13,9 @@ initialize_logging()
 
 
 @handle_exceptions
-def load_base_urls():
-    base_urls_source_path = Path(__file__).resolve().parent.parent.parent / 'base_urls'
-    txt_files = list(base_urls_source_path.glob('*.txt'))
+def es_load_base_urls():
+    base_urls_source_path = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'es_profile_endpoints'
+    txt_files = list(base_urls_source_path.glob('es_*.txt'))
 
     if txt_files:
         all_endpoints = []
@@ -33,19 +31,19 @@ def load_base_urls():
 
 
 @handle_exceptions
-async def process_url(page, url, retries=3):
+async def es_process_url(page, url, retries=3):
     attempt = 0
     while attempt < retries:
         try:
             await page.goto(url, timeout=60000)
             content = await page.content()
             soup = BeautifulSoup(content, 'html.parser')
-            container = soup.select_one('div#results-box div.relative ol.result-items')
+            container = soup.select_one('div.bloque-central .central div[itemscope]')
             endpoints = []
 
             if container:
-                for item in container.find_all('li', class_='result-item'):
-                    data_href = item.get('data-href')
+                for item in container.find_all('a', {'data-omniclick': 'name'}):
+                    data_href = item.get('href')
                     if data_href:
                         endpoints.append(data_href)
 
@@ -64,12 +62,12 @@ def randomize_wait_time(min_time, max_time):
 
 
 @handle_exceptions
-async def collect_profile_endpoints(can_run=False) -> bool:
+async def es_collect_profile_endpoints(can_run=False) -> bool:
     if not can_run:
-        custom_logger("Product endpoint collection disabled!.", log_type="info")
+        custom_logger("profile collection mode: off.", log_type="info")
         return False
 
-    endpoints = load_base_urls()
+    endpoints = es_load_base_urls()
     if not endpoints:
         custom_logger("No endpoints found", log_type="info")
         return False
@@ -131,16 +129,17 @@ async def collect_profile_endpoints(can_run=False) -> bool:
         page = await context.new_page()
         await stealth_async(page)
 
-        data_dir = Path(__file__).resolve().parent.parent.parent / 'data/profile_endpoints'
+        data_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'es_profile_urls'
+        print('>>>>>>>>>>>>>>>> ',data_dir, '>>>>>>>>>>>>>>>')
         data_dir.mkdir(parents=True, exist_ok=True)
 
         for file_name, urls in endpoints:
-            csv_file_path = data_dir / f"{file_name}.csv"
+            csv_file_path = data_dir / f"es_{file_name}.csv"
 
             all_endpoints = []
             for url in urls:
-                custom_logger(f"Processing URL: {url}", log_type="info")
-                extracted_endpoints = await process_url(page, url)
+                custom_logger(f"Processing url: {url}", log_type="info")
+                extracted_endpoints = await es_process_url(page, url)
                 all_endpoints.extend(extracted_endpoints)
                 await asyncio.sleep(randomize_wait_time(0.5, 1.5))
 
@@ -149,9 +148,7 @@ async def collect_profile_endpoints(can_run=False) -> bool:
                     csvwriter = csv.writer(csvfile)
                     csvwriter.writerow(['Endpoint'])  # Write the header every time
                     for endpoint in all_endpoints:
-                        updated_endpoint = f"https://www.goudengids.nl{endpoint}"
-                        print(updated_endpoint)
-                        csvwriter.writerow([updated_endpoint])
+                        csvwriter.writerow([endpoint])
                 custom_logger(f"Profile data saved to {csv_file_path}", log_type="info")
                 emulator(message="", is_in_progress=False)
 

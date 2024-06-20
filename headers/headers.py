@@ -46,6 +46,22 @@ class Headers:
             'upgrade-insecure-requests': '1',
             'user-agent': random.choice(user_agents)
         }
+        self.es_url_headers = {
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,'
+                      '*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'en-US,en;q=0.9',
+            'cache-control': 'max-age=0',
+            'cookie': 'incap_ses_1309_861374=QfSieHYObDGLVihHo4AqErkqdGYAAAAAbA8jrUiPeihuPSj3IRJMKg==',
+            'priority': 'u=0, i',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"macOS"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'same-origin',
+            'sec-fetch-user': '?1',
+            'upgrade-insecure-requests': '1',
+            'user-agent': random.choice(user_agents)
+        }
 
         if additional_headers:
             self.base_headers.update(additional_headers)
@@ -57,3 +73,7 @@ class Headers:
     def get_profile_headers(self):
         self.profile_headers["user-agent"] = random.choice(user_agents)
         return self.profile_headers
+
+    def es_get_urls_headers(self):
+        self.es_url_headers["user-agent"] = random.choice(user_agents)
+        return self.es_url_headers

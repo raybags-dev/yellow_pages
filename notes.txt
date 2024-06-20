@@ -1,0 +1,26 @@
+# Seacrh terms (nl):
+- advocaat
+- elektrotechnisch-ingenieur
+- burgerlijk-ingenieur
+- antropoloog
+- receptionisten
+- architect
+- neuroloog
+- psycholoog
+- aannemers
+- Huisartsenpraktijk
+
+# ==================
+# ==================
+
+ # Searcg terms (es)
+ médico
+ doctores # doctors
+ abogado # lawyer
+ ingeniero # engineer
+ farmacéutica # pharmasist
+ arquitecto # architect
+ dentista
+ psicólogo
+ veterinario
+ contador
