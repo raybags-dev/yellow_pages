@@ -5,6 +5,7 @@ from middlewares.errors.error_handler import handle_exceptions
 
 initialize_logging()
 
+
 @handle_exceptions
 def load_configs():
     try:
@@ -18,16 +19,28 @@ def load_configs():
         with open(config_file_path, 'r') as file:
             configs = json.load(file)
 
+        key_word_default = configs.get('key_word_default')
+        if not key_word_default:
+            msg = "> Error: true\n> Source: Configuration\n> Message: 'key_word_default' is missing or empty"
+            raise Exception(msg)
+
+        country = configs.get('country')
+        if not country:
+            msg = "> Error: true\n> Source: Configuration\n> Message: 'country' is missing or empty (options: nl|es)"
+            raise Exception(msg)
+
         default_region = configs.get('default_region')
         key_word_default = configs.get('key_word_default')
         run_pipeline = configs.get('run_pipeline')
+        country = configs.get('country')
 
         return {
             'default_region': default_region,
             'key_word_default': key_word_default,
-            'run_pipeline': run_pipeline
+            'run_pipeline': run_pipeline,
+            'country': country
         }
 
     except Exception as e:
-        custom_logger(f"{e}", 'error')
+        custom_logger(f"{e}", 'warn')
         return None

@@ -1,6 +1,7 @@
 
 {
     "run_pipeline": false,
-    "default_region": "amsterdam",
-    "key_word_default": "advocaat"
+    "default_region": "",
+    "key_word_default": "dentista",
+    "country": "js"
 }

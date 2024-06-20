@@ -9,11 +9,13 @@ numpy==1.26.4
 pandas==2.2.2
 pathlib==1.0.1
 playwright==1.44.0
+playwright-stealth==1.0.6
 pyee==11.1.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.1
 s3transfer==0.10.1
+setuptools==70.1.0
 six==1.16.0
 soupsieve==2.5
 tqdm==4.66.4
