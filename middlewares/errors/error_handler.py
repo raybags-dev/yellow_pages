@@ -1,6 +1,5 @@
 from src.utils.logger.logger import initialize_logging, custom_logger
 
-# Initialize logging once
 initialize_logging()
 
 

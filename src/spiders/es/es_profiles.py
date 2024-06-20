@@ -179,7 +179,6 @@ class EsMainProfileProcessor:
             else:
                 custom_logger(f"Duplicate entry found for {filename}, not appending.", log_type="info")
 
-
     @handle_exceptions
     async def es_save_to_s3(self, filename, data):
         filename = re.sub(r'(?<!^)es_', '', filename)
@@ -310,19 +309,6 @@ class EsMainProfileProcessor:
         custom_logger(f"Successfully processed {self.success_count} endpoints.")
         return self.success_count > 0
 
-    # @handle_exceptions
-    # async def es_run_profilers_main_worker(self, enable_processing=True, save_to_s3=False, save_to_local=True):
-    #     if not enable_processing:
-    #         custom_logger("Product processing is disabled.", log_type="info")
-    #         return False
-    #
-    #     endpoints = await self.es_load_profile_endpoints_csv_files()
-    #     if not endpoints:
-    #         custom_logger("No product endpoints to process.", log_type="info")
-    #         return False
-    #
-    #     # Process endpoints and save data based on parameters
-    #     await self.es_process_product_endpoints(endpoints, save_to_s3=save_to_s3, save_to_local=save_to_local)
     @handle_exceptions
     async def es_run_profilers_main_worker(self, enable_processing=True, save_to_s3=False, save_to_local=True):
         if not enable_processing:
