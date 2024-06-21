@@ -34,8 +34,8 @@ def extract_total_count(count_str):
 
 
 @handle_exceptions
-async def e_search_endpoints(can_run=False):
-    if not can_run:
+async def e_search_endpoints(enabled=False):
+    if not enabled:
         custom_logger("endpoint collection mode: off.", log_type="info")
         return False
 

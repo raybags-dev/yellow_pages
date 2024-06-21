@@ -310,8 +310,8 @@ class EsMainProfileProcessor:
         return self.success_count > 0
 
     @handle_exceptions
-    async def es_run_profilers_main_worker(self, enable_processing=True, save_to_s3=False, save_to_local=True):
-        if not enable_processing:
+    async def es_start(self, enabled=True, save_to_s3=False, save_to_local=True):
+        if not enabled:
             custom_logger("Product processing is disabled.", log_type="info")
             return False
 

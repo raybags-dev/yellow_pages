@@ -1,4 +1,5 @@
-# Seacrh terms (nl):
+# Seacrh terms testcase (nl):
+-------------------
 - advocaat
 - elektrotechnisch-ingenieur
 - burgerlijk-ingenieur
@@ -10,17 +11,19 @@
 - aannemers
 - Huisartsenpraktijk
 
-# ==================
-# ==================
 
- # Searcg terms (es)
+ # Searcg terms testcase (es)
+ -------------------
  médico
- doctores # doctors
- abogado # lawyer
- ingeniero # engineer
- farmacéutica # pharmasist
- arquitecto # architect
+ doctores
+ abogado
+ ingeniero
+ farmacéutica
+ arquitecto
  dentista
  psicólogo
  veterinario
  contador
+========================
+========================
+https://github.com/raybags-dev/yellow_pages
