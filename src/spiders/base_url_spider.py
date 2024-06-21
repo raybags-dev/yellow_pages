@@ -11,6 +11,7 @@ from middlewares.errors.error_handler import handle_exceptions
 from src.utils.task_utils.handle_cookies import handle_cookies
 from playwright.async_api import async_playwright, Error as PlaywrightError
 from src.utils.logger.logger import custom_logger, initialize_logging
+from src.utils.browser_launcher import browser_args, viewport
 
 
 initialize_logging()
@@ -29,10 +30,8 @@ def is_valid_url(url):
     parsed = urlparse(url)
     return all([parsed.scheme, parsed.netloc])
 
-
 def clean_total_count(count_str):
     return int(re.sub(r'[^\d]', '', count_str))
-
 
 @handle_exceptions
 async def collect_regional_search_endpoints(enabled=False):
@@ -61,54 +60,13 @@ async def collect_regional_search_endpoints(enabled=False):
                 # Launch browser with additional arguments
                 browser = await p.chromium.launch(
                     headless=True,
-                    args=[
-                        "--disable-blink-features=AutomationControlled",
-                        "--disable-infobars",
-                        "--no-sandbox",
-                        "--disable-dev-shm-usage",
-                        "--disable-extensions",
-                        "--disable-gpu",
-                        "--disable-setuid-sandbox",
-                        "--disable-software-rasterizer",
-                        "--disable-sync",
-                        "--disable-translate",
-                        "--disable-web-security",
-                        "--disable-xss-auditor",
-                        "--disable-notifications",
-                        "--disable-popup-blocking",
-                        "--disable-renderer-backgrounding",
-                        "--disable-background-timer-throttling",
-                        "--disable-backgrounding-occluded-windows",
-                        "--disable-breakpad",
-                        "--disable-client-side-phishing-detection",
-                        "--disable-component-extensions-with-background-pages",
-                        "--disable-default-apps",
-                        "--disable-features=TranslateUI",
-                        "--disable-hang-monitor",
-                        "--disable-ipc-flooding-protection",
-                        "--disable-prompt-on-repost",
-                        "--disable-renderer-accessibility",
-                        "--disable-site-isolation-trials",
-                        "--disable-spell-checking",
-                        "--disable-webgl",
-                        "--enable-features=NetworkService,NetworkServiceInProcess",
-                        "--enable-logging",
-                        "--log-level=0",
-                        "--no-first-run",
-                        "--no-pings",
-                        "--no-zygote",
-                        "--password-store=basic",
-                        "--use-mock-keychain",
-                        "--single-process",
-                        "--mute-audio",
-                        "--ignore-certificate-errors"
-                    ]
+                    args=browser_args()
                 )
 
                 context = await browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                                "Chrome/91.0.4472.124 Safari/537.36",
-                    viewport={"width": 1920, "height": 1080}
+                    viewport=viewport()
                 )
 
                 page = await context.new_page()
@@ -131,7 +89,8 @@ async def collect_regional_search_endpoints(enabled=False):
                 total_element = soup.select_one('.result-info__count span.count')
                 if total_element:
                     total_count = clean_total_count(total_element.text)
-                    custom_logger(f"Total results found: {total_count}", log_type="info")
+                    custom_logger(f"\n********\n-Total search results found: << {total_count} >>"
+                                  f"\n************\n", log_type="warn")
                     if total_count == 0:
                         custom_logger("No results for this search.", log_type="info")
                         emulator(is_in_progress=False)
@@ -146,7 +105,6 @@ async def collect_regional_search_endpoints(enabled=False):
                 # Generate URLs in the correct format
                 for page_num in range(1, total_count // 20 + 2):  # Ensure we cover all pages
                     page_url = f'{base_url}/{page_num}'
-                    custom_logger(f"Generated URL: {page_url}", log_type="info")
                     urls.add(page_url)
 
                 # Convert URLs to list and sort numerically

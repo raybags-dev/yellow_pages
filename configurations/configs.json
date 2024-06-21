@@ -1,7 +1,8 @@
 
 {
-    "run_pipeline": false,
+    "run_pipeline": true,
     "default_region": "",
-    "key_word_default": "neuroloog",
-    "country": "nl"
+    "key_word_default": "doctores",
+    "depth": 2,
+    "country": "es"
 }

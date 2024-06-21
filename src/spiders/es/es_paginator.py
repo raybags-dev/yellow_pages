@@ -10,6 +10,7 @@ from ochestrator.ochestrator import load_configs
 from middlewares.errors.error_handler import handle_exceptions
 from playwright.async_api import async_playwright, Error as PlaywrightError
 from src.utils.logger.logger import custom_logger, initialize_logging
+from src.utils.browser_launcher import browser_args, viewport
 
 initialize_logging()
 
@@ -57,54 +58,13 @@ async def e_search_endpoints(enabled=False):
                 # Launch browser with additional arguments
                 browser = await p.chromium.launch(
                     headless=True,
-                    args=[
-                        "--disable-blink-features=AutomationControlled",
-                        "--disable-infobars",
-                        "--no-sandbox",
-                        "--disable-dev-shm-usage",
-                        "--disable-extensions",
-                        "--disable-gpu",
-                        "--disable-setuid-sandbox",
-                        "--disable-software-rasterizer",
-                        "--disable-sync",
-                        "--disable-translate",
-                        "--disable-web-security",
-                        "--disable-xss-auditor",
-                        "--disable-notifications",
-                        "--disable-popup-blocking",
-                        "--disable-renderer-backgrounding",
-                        "--disable-background-timer-throttling",
-                        "--disable-backgrounding-occluded-windows",
-                        "--disable-breakpad",
-                        "--disable-client-side-phishing-detection",
-                        "--disable-component-extensions-with-background-pages",
-                        "--disable-default-apps",
-                        "--disable-features=TranslateUI",
-                        "--disable-hang-monitor",
-                        "--disable-ipc-flooding-protection",
-                        "--disable-prompt-on-repost",
-                        "--disable-renderer-accessibility",
-                        "--disable-site-isolation-trials",
-                        "--disable-spell-checking",
-                        "--disable-webgl",
-                        "--enable-features=NetworkService,NetworkServiceInProcess",
-                        "--enable-logging",
-                        "--log-level=0",
-                        "--no-first-run",
-                        "--no-pings",
-                        "--no-zygote",
-                        "--password-store=basic",
-                        "--use-mock-keychain",
-                        "--single-process",
-                        "--mute-audio",
-                        "--ignore-certificate-errors"
-                    ]
+                    args=browser_args()
                 )
 
                 context = await browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                                "Chrome/91.0.4472.124 Safari/537.36",
-                    viewport={"width": 1920, "height": 1080}
+                    viewport=viewport()
                 )
 
                 page = await context.new_page()

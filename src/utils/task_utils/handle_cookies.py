@@ -6,9 +6,7 @@ from src.utils.logger.logger import custom_logger
 @handle_exceptions
 async def handle_cookies(page: Page):
     try:
-        custom_logger("Checking for cookie consent overlay...", log_type="info")
-
-        # Set a short timeout for element checks
+        custom_logger("Checking browser readiness...", log_type="info")
         timeout_ms = 5000  # 5 seconds
 
         # Check if the wrapper and accept button are present
@@ -23,7 +21,7 @@ async def handle_cookies(page: Page):
         }''')
 
         if not wrapper_present:
-            custom_logger("Cookie script injected wrapper not found.", log_type="info")
+            custom_logger("\n____.____\n", log_type="info")
             return False
 
         if not accept_button_present:

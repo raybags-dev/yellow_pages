@@ -6,6 +6,7 @@ from playwright_stealth import stealth_async
 from playwright.async_api import async_playwright, Error as PlaywrightError
 from middlewares.errors.error_handler import handle_exceptions
 from src.utils.logger.logger import custom_logger, initialize_logging
+from src.utils.browser_launcher import browser_args, viewport
 from bs4 import BeautifulSoup
 
 
@@ -13,7 +14,7 @@ initialize_logging()
 
 
 @handle_exceptions
-def es_load_base_urls():
+def es_load_base_urls(depth=None):
     base_urls_source_path = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'es_profile_endpoints'
     txt_files = list(base_urls_source_path.glob('es_*.txt'))
 
@@ -22,8 +23,14 @@ def es_load_base_urls():
         for file in txt_files:
             with file.open('r', encoding='utf-8') as f:
                 endpoints = [line.strip() for line in f.readlines()]
+                original_count = len(endpoints)
+                if depth is not None and depth > 0:
+                    endpoints = endpoints[:depth]  # Limit the number of endpoints based on the provided depth
+                    custom_logger(f"Loaded {depth} profile endpoints from {file.name}", log_type="info")
+                else:
+                    custom_logger(f"Loaded all available {original_count} profile endpoints from {file.name}",
+                                  log_type="info")
                 all_endpoints.append((file.stem, endpoints))
-                custom_logger(f"Loaded {len(endpoints)} endpoints from {file.name}", log_type="info")
         return all_endpoints
     else:
         custom_logger("No valid profile_base URLs to process.", log_type="info")
@@ -62,12 +69,12 @@ def randomize_wait_time(min_time, max_time):
 
 
 @handle_exceptions
-async def es_collect_profile_endpoints(enabled=False) -> bool:
+async def es_collect_profile_endpoints(enabled=False, depth=None) -> bool:
     if not enabled:
         custom_logger("profile collection mode: off.", log_type="info")
         return False
 
-    endpoints = es_load_base_urls()
+    endpoints = es_load_base_urls(depth)
     if not endpoints:
         custom_logger("No endpoints found", log_type="info")
         return False
@@ -77,53 +84,12 @@ async def es_collect_profile_endpoints(enabled=False) -> bool:
 
         browser = await p.chromium.launch(
             headless=True,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--disable-infobars",
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-extensions",
-                "--disable-gpu",
-                "--disable-setuid-sandbox",
-                "--disable-software-rasterizer",
-                "--disable-sync",
-                "--disable-translate",
-                "--disable-web-security",
-                "--disable-xss-auditor",
-                "--disable-notifications",
-                "--disable-popup-blocking",
-                "--disable-renderer-backgrounding",
-                "--disable-background-timer-throttling",
-                "--disable-backgrounding-occluded-windows",
-                "--disable-breakpad",
-                "--disable-client-side-phishing-detection",
-                "--disable-component-extensions-with-background-pages",
-                "--disable-default-apps",
-                "--disable-features=TranslateUI",
-                "--disable-hang-monitor",
-                "--disable-ipc-flooding-protection",
-                "--disable-prompt-on-repost",
-                "--disable-renderer-accessibility",
-                "--disable-site-isolation-trials",
-                "--disable-spell-checking",
-                "--disable-webgl",
-                "--enable-features=NetworkService,NetworkServiceInProcess",
-                "--enable-logging",
-                "--log-level=0",
-                "--no-first-run",
-                "--no-pings",
-                "--no-zygote",
-                "--password-store=basic",
-                "--use-mock-keychain",
-                "--single-process",
-                "--mute-audio",
-                "--ignore-certificate-errors"
-            ]
+            args=browser_args()
         )
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                        "Chrome/91.0.4472.124 Safari/537.36",
-            viewport={"width": 1920, "height": 1080}
+            viewport=viewport()
         )
 
         page = await context.new_page()
