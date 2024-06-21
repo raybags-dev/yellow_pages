@@ -15,6 +15,7 @@ from src.utils.task_utils.utilities import generate_uuid
 from src.utils.logger.logger import custom_logger, initialize_logging
 from src.utils.parsers.es_parse_profile import es_extract_profile_data
 from src.utils.task_utils.loader import emulator
+from src.utils.browser_launcher import browser_args, viewport
 
 initialize_logging()
 
@@ -32,7 +33,7 @@ class EsMainProfileProcessor:
         self.save_to_local = save_to_local
 
     @handle_exceptions
-    async def es_load_profile_endpoints_csv_files(self):
+    async def es_load_profile_endpoints_csv_files(self, depth=None):
         base_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'es_profile_urls'
         if not base_dir.exists() or not base_dir.is_dir():
             custom_logger(f"The directory {base_dir} does not exist or is not a directory.", log_type="error")
@@ -57,7 +58,14 @@ class EsMainProfileProcessor:
                     if url:
                         profile_url_constructs.add((csv_file.stem, url))
 
-        return list(profile_url_constructs)
+        endpoints_list = list(profile_url_constructs)
+        if depth is not None and depth > 0:
+            endpoints_list = endpoints_list[:depth]
+            custom_logger(f"\n- Loading {len(endpoints_list)} profile(s) endpoint collection...\n", log_type="info")
+        else:
+            custom_logger(f"\nLoading all profiles for processing...\n", log_type="info")
+
+        return endpoints_list
 
     @handle_exceptions
     async def es_download_and_process_page(self, page, url):
@@ -111,7 +119,7 @@ class EsMainProfileProcessor:
         profile_data_file = self.data_dir / f"{filename}_profile_data.csv"
 
         fieldnames = [
-            'uuid', 'business_id', 'profession',  'crawled_url', 'phone', 'address',
+            'uuid', 'business_id', 'profession', 'crawled_url', 'phone', 'address',
             'business_url', 'email', 'description', 'business_images', 'miscellaneous_info',
             'profile_title', 'latitude', 'longitude'
         ]
@@ -211,55 +219,9 @@ class EsMainProfileProcessor:
     @handle_exceptions
     async def es_process_product_endpoints(self, endpoints, save_to_s3=True, save_to_local=True, concurrency=3):
         async with async_playwright() as p:
-            project_headers_obj = Headers()
-            browser = await p.chromium.launch(
-                headless=True,
-                args=[
-                    "--disable-blink-features=AutomationControlled",
-                    "--disable-infobars",
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-extensions",
-                    "--disable-gpu",
-                    "--disable-setuid-sandbox",
-                    "--disable-software-rasterizer",
-                    "--disable-sync",
-                    "--disable-translate",
-                    "--disable-web-security",
-                    "--disable-xss-auditor",
-                    "--disable-notifications",
-                    "--disable-popup-blocking",
-                    "--disable-renderer-backgrounding",
-                    "--disable-background-timer-throttling",
-                    "--disable-backgrounding-occluded-windows",
-                    "--disable-breakpad",
-                    "--disable-client-side-phishing-detection",
-                    "--disable-component-extensions-with-background-pages",
-                    "--disable-default-apps",
-                    "--disable-features=TranslateUI",
-                    "--disable-hang-monitor",
-                    "--disable-ipc-flooding-protection",
-                    "--disable-prompt-on-repost",
-                    "--disable-renderer-accessibility",
-                    "--disable-site-isolation-trials",
-                    "--disable-spell-checking",
-                    "--disable-webgl",
-                    "--enable-features=NetworkService,NetworkServiceInProcess",
-                    "--enable-logging",
-                    "--log-level=0",
-                    "--no-first-run",
-                    "--no-pings",
-                    "--no-zygote",
-                    "--password-store=basic",
-                    "--use-mock-keychain",
-                    "--single-process",
-                    "--mute-audio",
-                    "--ignore-certificate-errors"
-                ]
-            )
-
-            context = await browser.new_context(extra_http_headers=project_headers_obj.es_get_urls_headers(),
-                                                viewport={"width": 1920, "height": 1080})
+            headers = Headers()
+            browser = await p.chromium.launch(headless=True,args=browser_args())
+            context = await browser.new_context(extra_http_headers=headers.es_get_urls_headers(),viewport=viewport())
 
             # Initialize the profile data file
             filename = endpoints[0][0] if endpoints else "default"
@@ -269,7 +231,6 @@ class EsMainProfileProcessor:
                 try:
                     page = await context.new_page()
                     await stealth_async(page)
-                    custom_logger(f"Downloading in progress...", log_type="info")
                     await page.goto(url)
                     page_content = await page.content()
                     profile_data = es_extract_profile_data(page_content)
@@ -310,12 +271,12 @@ class EsMainProfileProcessor:
         return self.success_count > 0
 
     @handle_exceptions
-    async def es_start(self, enabled=True, save_to_s3=False, save_to_local=True):
+    async def es_start(self, enabled=True, depth=None, save_to_s3=False, save_to_local=True):
         if not enabled:
             custom_logger("Product processing is disabled.", log_type="info")
             return False
 
-        endpoints = await self.es_load_profile_endpoints_csv_files()
+        endpoints = await self.es_load_profile_endpoints_csv_files(depth=depth)
         if not endpoints:
             custom_logger("No product endpoints to process.", log_type="info")
             return False
