@@ -65,6 +65,7 @@ async def main():
         else:
             custom_logger(f"Sorry this country is not supported - opts: (nl|es)", log_type="warn")
             sys.exit(1)
+
     except Exception as e:
         custom_logger(f"An unexpected error occurred in the main function: {e}", log_type="error")
         sys.exit(1)

@@ -4,6 +4,8 @@ beautifulsoup4==4.12.3
 boto3==1.34.128
 botocore==1.34.128
 colorama==0.4.6
+geographiclib==2.0
+geopy==2.4.1
 greenlet==3.0.3
 iniconfig==2.0.0
 jmespath==1.0.1
@@ -26,4 +28,4 @@ soupsieve==2.5
 tqdm==4.66.4
 typing_extensions==4.12.2
 tzdata==2024.1
-urllib3
+urllib3==2.2.1

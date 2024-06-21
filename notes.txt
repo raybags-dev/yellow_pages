@@ -1,29 +1,35 @@
-# Seacrh terms testcase (nl):
--------------------
-- advocaat
-- elektrotechnisch-ingenieur
-- burgerlijk-ingenieur
-- antropoloog
-- receptionisten
-- architect
-- neuroloog
-- psycholoog
-- aannemers
-- Huisartsenpraktijk
+_________________________________
+MODULES:
+1. Playwright & playwright-stealth
+To effectively retrieve the required data from the target website which serve web html pages from the server,  I decided to use a headless browser API mechanism for its ability to execute JavaScript and fully render web pages.
+I chose Playwright  for this purpose because of its robust and stable toolkit, which supports a wide range of browser clients (including Chromium, Firefox, and WebKit - this came in handy for dynamic user-agent switching).
+Its advanced features, such as automatic handling of waiting for elements and comprehensive API, facilitate efficient and reliable data extraction from web pages.
+_________________________________
+2. BeautifulSoup (bs4)
+For tasks involving the extraction of data from static web pages or well-structured HTML documents, Beautiful Soup was my top choice. Unlike more complex web scraping technologies that handle JavaScript rendering, Beautiful Soup excels in simplicity
+given its ease of use when dealing with straightforward HTML parsing. Its intuitive API allows for quick extraction and navigation of
+HTML elements, which made it an ideal choice for the projects. Playwrite its self could do the job and simplicity was with Bs4
+_________________________________
+3. Regexp:
+A lot of data was available in HTML elements but given the DOM state and TimeoutErrors, sometimes, data maybe be missed which is why, suplimenting
+collected data with alternative sets picked up with regExpressions was a good choice
+_________________________________
 
+4. Pytest
+For testing pytest was my choice for testing due to its ease of use.
+_________________________________
+5. boto3,botocore and s3transfer
+For cloud storage I decided to go with AWS S3 storage offering due to its simplicity and robustness.
+_________________________________
+6.  Its possible to enrich the collected data using reverse geo search with Nominatim
+ for datasets with coordinates - (optional)
 
- # Searcg terms testcase (es)
- -------------------
- médico
- doctores
- abogado
- ingeniero
- farmacéutica
- arquitecto
- dentista
- psicólogo
- veterinario
- contador
-========================
-========================
-https://github.com/raybags-dev/yellow_pages
+SITES:
+- https://www.hg.org/lawfirms/spain
+- https://www.abogado-barcelona.net/directory
+- https://www.derechoabogados.es
+- https://lex.ahk.es/directorio-profesionales
+- https://empresite.eleconomista.es/Actividad/BUFETE-ABOGADOS/
+- https://www.topabogados.com/es/
+  >> https://www.topabogados.com/es/resultado-de-busqueda/5181433647726592/0/
+
