@@ -257,14 +257,14 @@ class MainProfileProcessor:
         return self.success_count > 0
 
     @handle_exceptions
-    async def run_profilers_main_worker(self, enable_processing=True, save_to_s3=False, save_to_local=False):
-        if not enable_processing:
-            custom_logger("Product processing is disabled.", log_type="info")
+    async def run_nl_worker(self, enabled=True, save_to_s3=False, save_to_local=False):
+        if not enabled:
+            custom_logger("Profile data collection disabled!", log_type="info")
             return False
 
         endpoints = await self.load_profile_endpoints_csv_files()
         if not endpoints:
-            custom_logger("No product endpoints to process.", log_type="info")
+            custom_logger("No profile endpoints to process.", log_type="info")
             return False
 
         # Process endpoints and save data based on parameters

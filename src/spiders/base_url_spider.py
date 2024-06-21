@@ -35,9 +35,9 @@ def clean_total_count(count_str):
 
 
 @handle_exceptions
-async def collect_regional_search_endpoints(can_run=False):
-    if not can_run:
-        custom_logger("BaseURL collection disabled!", log_type="info")
+async def collect_regional_search_endpoints(enabled=False):
+    if not enabled:
+        custom_logger("Base-url collection disabled!", log_type="info")
         return False
 
     base_url = f'https://www.goudengids.nl/nl/zoeken/{keyword}'

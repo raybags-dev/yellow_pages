@@ -64,9 +64,9 @@ def randomize_wait_time(min_time, max_time):
 
 
 @handle_exceptions
-async def collect_profile_endpoints(can_run=False) -> bool:
-    if not can_run:
-        custom_logger("Product endpoint collection disabled!.", log_type="info")
+async def collect_profile_endpoints(enabled=False) -> bool:
+    if not enabled:
+        custom_logger("Profile endpoint collection disabled!.", log_type="info")
         return False
 
     endpoints = load_base_urls()
