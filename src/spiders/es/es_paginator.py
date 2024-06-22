@@ -56,21 +56,19 @@ async def e_search_endpoints(enabled=False):
         try:
             async with async_playwright() as p:
                 # Launch browser with additional arguments
+                arguments = await browser_args()
+                view_port = await viewport()
+
                 browser = await p.chromium.launch(
                     headless=True,
-                    args=browser_args()
+                    args=arguments
                 )
-
-                context = await browser.new_context(
-                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                               "Chrome/91.0.4472.124 Safari/537.36",
-                    viewport=viewport()
-                )
+                # print("arguments:>>>>>> ", arguments)
+                # print("view_port:>>>>>> ", view_port)
+                context = await browser.new_context(viewport=view_port)
 
                 page = await context.new_page()
-                # Enable stealth mode
                 await stealth_async(page)
-                # Set extra HTTP headers
                 es_url_headers_ = Headers()
                 await page.set_extra_http_headers(es_url_headers_.es_get_urls_headers())
 
@@ -84,7 +82,7 @@ async def e_search_endpoints(enabled=False):
                 total_element = soup.select_one('span[class="h1"]')
                 if total_element:
                     total_count = extract_total_count(total_element.text)
-                    custom_logger(f"Total results found: {total_count}", log_type="info")
+                    custom_logger(f"\n> Total results found: {total_count}", log_type="info")
                     if total_count == 0:
                         custom_logger("No results for this search.", log_type="info")
                         emulator(is_in_progress=False)
@@ -101,12 +99,12 @@ async def e_search_endpoints(enabled=False):
                 for page_num in range(1, total_pages + 1):
                     page_url = (f'https://www.paginasamarillas.es/search/{keyword}/all-ma/all-pr/all-is/all-ci/all-ba'
                                 f'/all-pu/all-nc/{page_num}')
-                    custom_logger(f"Generated URL: {page_url}", log_type="info")
+
                     urls.add(page_url)
 
                 # Convert URLs to list and sort numerically
                 sorted_urls = sorted(urls, key=lambda url: int(url.rsplit('/', 1)[-1]))
-
+                custom_logger(f"URL butches page count: {len(sorted_urls)}", log_type="info")
                 if sorted_urls:
                     with base_urls_file.open('w', encoding='utf-8') as f:
                         for url in sorted_urls:

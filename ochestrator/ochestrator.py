@@ -1,10 +1,18 @@
-import json
+import json, re
 from pathlib import Path
 from src.utils.logger.logger import initialize_logging, custom_logger
 from middlewares.errors.error_handler import handle_exceptions
 
-
 initialize_logging()
+
+
+def is_valid_search_term(term):
+    if term.isdigit():
+        return False
+    if re.search(r'[!@#$%^&*(),.?":{}|<>]', term):
+        return False
+    return True
+
 
 @handle_exceptions
 def load_configs():
@@ -23,6 +31,12 @@ def load_configs():
             if not configs.get(key):
                 msg = f"> Error: true\n> Source: Configuration\n> Message: '{key}' is missing or empty"
                 raise Exception(msg)
+
+        # Validate the search term
+        key_word_default = configs['key_word_default']
+        if not is_valid_search_term(key_word_default):
+            msg = f"> Error: true\n> Source: Configuration\n> Message: 'key_word_default' contains invalid characters - Only strings allowed"
+            raise Exception(msg)
 
         # Validate and convert run_pipeline to boolean
         run_pipeline = configs.get('run_pipeline')
@@ -47,7 +61,7 @@ def load_configs():
                 except ValueError:
                     depth = 1
         elif depth is None:
-            depth = 1
+            depth = None
         elif not isinstance(depth, int):
             msg = "> Error: true\n> Source: Configuration\n> Message: 'depth' must be an integer or null"
             raise Exception(msg)

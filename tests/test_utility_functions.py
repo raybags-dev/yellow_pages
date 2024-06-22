@@ -13,13 +13,12 @@ from src.utils.task_utils.utilities import randomize_timeout, generate_uuid
 @pytest.mark.asyncio
 async def test_handle_cookies_success():
     page = AsyncMock()
-
     page.evaluate.side_effect = [True, True]
 
     with patch('src.utils.task_utils.handle_cookies.custom_logger') as mock_logger:
         result = await handle_cookies(page)
 
-        mock_logger.assert_any_call("Checking for cookie consent overlay...", log_type="info")
+        mock_logger.assert_any_call("Checking browser readiness...", log_type="info")
         mock_logger.assert_any_call("Clicking on accept button for cookies...", log_type="info")
         mock_logger.assert_any_call("Clicked accept button successfully.", log_type="info")
 
@@ -31,7 +30,6 @@ async def test_handle_cookies_success():
 @pytest.mark.asyncio
 async def test_handle_cookies_wrapper_not_found():
     page = AsyncMock()
-
     page.evaluate.side_effect = [
         False,  # wrapper_present
         True  # accept_button_present (not actually checked)
@@ -40,8 +38,8 @@ async def test_handle_cookies_wrapper_not_found():
     with patch('src.utils.task_utils.handle_cookies.custom_logger') as mock_logger:
         result = await handle_cookies(page)
 
-        mock_logger.assert_any_call("Checking for cookie consent overlay...", log_type="info")
-        mock_logger.assert_any_call("Cookie script injected wrapper not found.", log_type="info")
+        mock_logger.assert_any_call("Checking browser readiness...", log_type="info")
+        mock_logger.assert_any_call("\n____.____\n", log_type="info")
 
         assert result is False
 
@@ -49,7 +47,6 @@ async def test_handle_cookies_wrapper_not_found():
 @pytest.mark.asyncio
 async def test_handle_cookies_accept_button_not_found():
     page = AsyncMock()
-
     page.evaluate.side_effect = [
         True,  # wrapper_present
         False  # accept_button_present
@@ -58,7 +55,7 @@ async def test_handle_cookies_accept_button_not_found():
     with patch('src.utils.task_utils.handle_cookies.custom_logger') as mock_logger:
         result = await handle_cookies(page)
 
-        mock_logger.assert_any_call("Checking for cookie consent overlay...", log_type="info")
+        mock_logger.assert_any_call("Checking browser readiness...", log_type="info")
         mock_logger.assert_any_call("Cookie accept button not found.", log_type="info")
 
         assert result is False
@@ -67,19 +64,18 @@ async def test_handle_cookies_accept_button_not_found():
 @pytest.mark.asyncio
 async def test_handle_cookies_exception():
     page = AsyncMock()
-
     page.evaluate.side_effect = Exception("Some error")
 
     with patch('src.utils.task_utils.handle_cookies.custom_logger') as mock_logger:
         result = await handle_cookies(page)
 
-        mock_logger.assert_any_call("Checking for cookie consent overlay...", log_type="info")
+        mock_logger.assert_any_call("Checking browser readiness...", log_type="info")
         mock_logger.assert_any_call("Error handling cookies: Some error", log_type="error")
 
         assert result is False
 
 
-# ============= emulator =========
+# ============= emulator ==========
 
 class TestLoadingEmulator(unittest.TestCase):
 

@@ -147,7 +147,7 @@ def es_extract_profile_data(page_content):
         product_data = {}
 
         # Debugger line
-        custom_logger(f"\nCollected: \n[\n '{extracted_id}' ]", 'info')
+        custom_logger(f"\n**************\nCollected:\n> url: '{url_value}'\n> id: '{extracted_id}'\n> title: '{profile_title}'\n> address: '{full_address}' \n", 'info')
 
         product_data.update({
             'business_id': extracted_id if extracted_id else "unavailable",

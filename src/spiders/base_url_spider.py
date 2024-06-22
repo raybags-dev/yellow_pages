@@ -13,7 +13,6 @@ from playwright.async_api import async_playwright, Error as PlaywrightError
 from src.utils.logger.logger import custom_logger, initialize_logging
 from src.utils.browser_launcher import browser_args, viewport
 
-
 initialize_logging()
 
 configs = load_configs()
@@ -30,8 +29,10 @@ def is_valid_url(url):
     parsed = urlparse(url)
     return all([parsed.scheme, parsed.netloc])
 
+
 def clean_total_count(count_str):
     return int(re.sub(r'[^\d]', '', count_str))
+
 
 @handle_exceptions
 async def collect_regional_search_endpoints(enabled=False):
@@ -58,15 +59,17 @@ async def collect_regional_search_endpoints(enabled=False):
         try:
             async with async_playwright() as p:
                 # Launch browser with additional arguments
+                arguments = await browser_args()
+                view_port = await viewport()
                 browser = await p.chromium.launch(
                     headless=True,
-                    args=browser_args()
+                    args=arguments
                 )
 
                 context = await browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                                "Chrome/91.0.4472.124 Safari/537.36",
-                    viewport=viewport()
+                    viewport=view_port
                 )
 
                 page = await context.new_page()
@@ -126,7 +129,8 @@ async def collect_regional_search_endpoints(enabled=False):
             retries -= 1
             custom_logger(f"Playwright error occurred: {str(e)}. Retries left: {retries}", log_type="error")
             if retries == 0:
-                custom_logger("All retries exhausted. Please try again later or consider updating headers.", log_type="error")
+                custom_logger("All retries exhausted. Please try again later or consider updating headers.",
+                              log_type="error")
                 emulator(is_in_progress=False)
                 return False
             await asyncio.sleep(5)  # Wait before retrying

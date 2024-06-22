@@ -32,11 +32,11 @@ async def main():
                     if paging_ready:
                         urls_available = await collect_profile_endpoints(enabled=True, depth=max_depth)
                         if urls_available:
-                            await processor.run_nl_worker(enabled=True, depth=max_depth, save_to_s3=False, save_to_local=True)
+                            await processor.run_nl_worker(enabled=True, save_to_s3=False, save_to_local=True)
                 else:
                     await collect_regional_search_endpoints(enabled=False)
                     await collect_profile_endpoints(enabled=False, depth=max_depth)
-                    await processor.run_nl_worker(enabled=True, depth=max_depth, save_to_s3=False, save_to_local=True)
+                    await processor.run_nl_worker(enabled=False,  save_to_s3=False, save_to_local=True)
             except Exception as e:
                 custom_logger(f"An error occurred during NL execution: {e}", log_type="error")
             finally:
@@ -52,11 +52,11 @@ async def main():
                         es_endpoints_ready = await es_collect_profile_endpoints(enabled=True, depth=max_depth)
                         if es_endpoints_ready:
                             await (processor
-                                   .es_start(enabled=True, depth=max_depth, save_to_s3=False, save_to_local=True))
+                                   .es_start(enabled=True, save_to_s3=False, save_to_local=True))
                 else:
                     await e_search_endpoints(enabled=False)
                     await es_collect_profile_endpoints(enabled=False, depth=max_depth)
-                    await (processor.es_start(enabled=True, depth=max_depth, save_to_s3=False, save_to_local=True))
+                    await (processor.es_start(enabled=False, save_to_s3=False, save_to_local=True))
 
             except Exception as e:
                 custom_logger(f"An error occurred during ES execution: {e}", log_type="error")
