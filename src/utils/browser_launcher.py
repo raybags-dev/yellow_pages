@@ -1,7 +1,7 @@
 from src.utils.logger.logger import custom_logger
 
 
-def browser_args():
+async def browser_args():
     try:
         return [
             "--disable-blink-features=AutomationControlled",
@@ -49,5 +49,9 @@ def browser_args():
         custom_logger(f"Error returning browser args: {str(e)}", log_type="warn")
 
 
-def viewport():
-    return {"width": 1920, "height": 1080}
+async def viewport():
+    try:
+        return {"width": 1920, "height": 1080}
+    except Exception as e:
+        custom_logger(f"Error returning viewport size: {str(e)}", log_type="warn")
+

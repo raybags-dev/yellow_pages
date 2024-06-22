@@ -169,7 +169,7 @@ def extract_profile_data(page_content):
             competitors.append(competitor_info)
 
         # Debugger line
-        custom_logger(f"\nCollected: \n[\n '{business_id}',\n '{profile_title}',\n '{full_address}' \n ]", 'info')
+        custom_logger(f"\n**************\nCollected:\n> url: '{clean_url}'\n> id: '{business_id}'\n> title: '{profile_title}'\n> address: '{full_address}' \n", 'info')
 
         product_data.update({
             'business_name': profile_title.strip() if profile_title else "unavailable",

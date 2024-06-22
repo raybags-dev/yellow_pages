@@ -58,15 +58,17 @@ async def collect_regional_search_endpoints(enabled=False):
         try:
             async with async_playwright() as p:
                 # Launch browser with additional arguments
+                arguments = await browser_args()
+                view_port = await viewport()
                 browser = await p.chromium.launch(
                     headless=True,
-                    args=browser_args()
+                    args=arguments
                 )
 
                 context = await browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                                "Chrome/91.0.4472.124 Safari/537.36",
-                    viewport=viewport()
+                    viewport=view_port
                 )
 
                 page = await context.new_page()

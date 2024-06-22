@@ -62,6 +62,26 @@ class Headers:
             'upgrade-insecure-requests': '1',
             'user-agent': random.choice(user_agents)
         }
+        self.es_profile_list_headers = {
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,'
+                      '*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'en-US,en;q=0.9',
+            'cache-control': 'max-age=0',
+            'cookie': 'ID_BUSQUEDA=paol20622152916Xadce5b314c0a8d11; oldSearch=c04f89bb5cc93a107e37c10124f6026d; '
+                      'paol_searchs=a%3AAbogado%7Cub%3Adoctores%7C%7Ea%3AAbogado%7C; seedCookie=3558; '
+                      'incap_ses_108_861374=YcheEhX0bR3z9UDRi7F/AZPNdmYAAAAAE4grngKfMAEooHNLp1t/DQ==; '
+                      'incap_ses_1288_861374=ev2+HOe0AWtJuVPKP+XfEazRdmYAAAAAesO2CMv4+AbyGWsBnCPk1g==; '
+                      'incap_ses_1309_861374=QfSieHYObDGLVihHo4AqErkqdGYAAAAAbA8jrUiPeihuPSj3IRJMKg==',
+            'priority': 'u=0, i',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"macOS"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'same-origin',
+            'sec-fetch-user': '?1',
+            'upgrade-insecure-requests': '1',
+            'user-agent': random.choice(user_agents)
+        }
 
         if additional_headers:
             self.base_headers.update(additional_headers)
@@ -77,3 +97,7 @@ class Headers:
     def es_get_urls_headers(self):
         self.es_url_headers["user-agent"] = random.choice(user_agents)
         return self.es_url_headers
+
+    def es_profile_list(self):
+        self.es_profile_list_headers["user-agent"] = random.choice(user_agents)
+        return self.es_profile_list_headers

@@ -47,7 +47,7 @@ class EsMainProfileProcessor:
         profile_url_constructs = set()
         for csv_file in csv_files:
             if csv_file.stat().st_size == 0:
-                custom_logger(f"The file {csv_file.name} is empty.", log_type="warning")
+                custom_logger(f"The file {csv_file.name} is empty.", log_type="warn")
                 continue
 
             with csv_file.open(mode='r', newline='', encoding='utf-8') as file:
@@ -59,11 +59,11 @@ class EsMainProfileProcessor:
                         profile_url_constructs.add((csv_file.stem, url))
 
         endpoints_list = list(profile_url_constructs)
-        if depth is not None and depth > 0:
-            endpoints_list = endpoints_list[:depth]
-            custom_logger(f"\n- Loading {len(endpoints_list)} profile(s) endpoint collection...\n", log_type="info")
-        else:
-            custom_logger(f"\nLoading all profiles for processing...\n", log_type="info")
+        # if depth is not None and depth > 0:
+        #     endpoints_list = endpoints_list[:depth]
+        #     custom_logger(f"\n- Loading {len(endpoints_list)} profile(s) endpoint collection...\n", log_type="info")
+        # else:
+        #     custom_logger(f"\nLoading all profiles for processing...\n", log_type="info")
 
         return endpoints_list
 
@@ -218,57 +218,77 @@ class EsMainProfileProcessor:
 
     @handle_exceptions
     async def es_process_product_endpoints(self, endpoints, save_to_s3=True, save_to_local=True, concurrency=3):
-        async with async_playwright() as p:
-            headers = Headers()
-            browser = await p.chromium.launch(headless=True,args=browser_args())
-            context = await browser.new_context(extra_http_headers=headers.es_get_urls_headers(),viewport=viewport())
+        retries = 3
+        while retries > 0:
+            try:
+                async with async_playwright() as p:
+                    headers = Headers()
+                    extra_headers = headers.es_get_urls_headers()
+                    arguments = await browser_args()
+                    view_port = await viewport()
 
-            # Initialize the profile data file
-            filename = endpoints[0][0] if endpoints else "default"
-            await self.initialize_profile_data_file(filename)
+                    browser = await p.chromium.launch(headless=True, args=arguments)
+                    context = await browser.new_context(extra_http_headers=extra_headers, viewport=view_port)
 
-            async def es_download_and_process_page(filename, url):
-                try:
-                    page = await context.new_page()
-                    await stealth_async(page)
-                    await page.goto(url)
-                    page_content = await page.content()
-                    profile_data = es_extract_profile_data(page_content)
-                    emulator(message="Processing page...", is_in_progress=True)
-                    if "error" in profile_data:
-                        emulator(is_in_progress=False)
-                        return {"url": url, "error": profile_data["error"], "message": profile_data["message"]}
-                    if profile_data:
-                        if save_to_s3:
-                            await self.es_save_to_s3(filename, profile_data)
-                        elif save_to_local:
-                            await self.es_save_to_local(filename, profile_data)
-                    emulator(is_in_progress=False)
-                    return profile_data
-                except Exception as e:
-                    custom_logger(f"Failed to process page {url}: {e}", log_type="error")
-                    return None
+                    # Initialize the profile data file
+                    filename = endpoints[0][0] if endpoints else "default"
+                    await self.initialize_profile_data_file(filename)
 
-            async def es_process_batch(batch):
-                tasks = [es_download_and_process_page(filename, url) for filename, url in batch]
-                results = await asyncio.gather(*tasks, return_exceptions=True)
-                return results
+                    async def es_download_and_process_page(filename, url):
+                        try:
+                            page = await context.new_page()
+                            await stealth_async(page)
+                            await page.goto(url)
+                            page_content = await page.content()
+                            profile_data = es_extract_profile_data(page_content)
+                            emulator(message="Processing page...", is_in_progress=True)
+                            if "error" in profile_data:
+                                emulator(is_in_progress=False)
+                                return {"url": url, "error": profile_data["error"], "message": profile_data["message"]}
+                            if profile_data:
+                                if save_to_s3:
+                                    await self.es_save_to_s3(filename, profile_data)
+                                elif save_to_local:
+                                    await self.es_save_to_local(filename, profile_data)
+                            emulator(is_in_progress=False)
+                            return profile_data
+                        except TargetClosedError as e:
+                            custom_logger(f"TargetClosedError processing page {url}: {e}", log_type="error")
+                            self.retries.append((filename, url))
+                            return None
+                        except Exception as e:
+                            custom_logger(f"Failed to process page {url}: {e}", log_type="error")
+                            return None
 
-            batch_size = concurrency
-            for i in range(0, len(endpoints), batch_size):
-                current_batch = endpoints[i:i + batch_size]
-                await es_process_batch(current_batch)
+                    async def es_process_batch(batch):
+                        tasks = [es_download_and_process_page(filename, url) for filename, url in batch]
+                        results = await asyncio.gather(*tasks, return_exceptions=True)
+                        return results
 
-            if self.retries:
-                custom_logger(f"Retrying {len(self.retries)} failed endpoints.", log_type="info")
-                await es_process_batch(self.retries)
-                self.retries.clear()
+                    batch_size = concurrency
+                    for i in range(0, len(endpoints), batch_size):
+                        current_batch = endpoints[i:i + batch_size]
+                        await es_process_batch(current_batch)
 
-            await context.close()
-            await browser.close()
+                    if self.retries:
+                        custom_logger(f"Retrying {len(self.retries)} failed endpoints.", log_type="info")
+                        await es_process_batch(self.retries)
+                        self.retries.clear()
 
-        custom_logger(f"Successfully processed {self.success_count} endpoints.")
-        return self.success_count > 0
+                    await context.close()
+                    await browser.close()
+
+                custom_logger(f"Successfully processed {self.success_count} endpoints.")
+                return self.success_count > 0
+            except Exception as e:
+                custom_logger(f"An error occurred: {e}", log_type="error")
+                retries -= 1
+                if retries == 0:
+                    custom_logger("Max retries reached. Exiting.", log_type="error")
+                    return False
+                else:
+                    custom_logger(f"Retrying... {retries} attempts left.", log_type="warn")
+                    await asyncio.sleep(5)  # Wait before retrying
 
     @handle_exceptions
     async def es_start(self, enabled=True, depth=None, save_to_s3=False, save_to_local=True):
@@ -276,7 +296,9 @@ class EsMainProfileProcessor:
             custom_logger("Product processing is disabled.", log_type="info")
             return False
 
-        endpoints = await self.es_load_profile_endpoints_csv_files(depth=depth)
+        # endpoints = await self.es_load_profile_endpoints_csv_files(depth=depth)
+        endpoints = await self.es_load_profile_endpoints_csv_files()
+
         if not endpoints:
             custom_logger("No product endpoints to process.", log_type="info")
             return False

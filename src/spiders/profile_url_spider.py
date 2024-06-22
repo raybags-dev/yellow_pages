@@ -1,6 +1,7 @@
 import asyncio
 from pathlib import Path
 import re,random, csv
+from urllib.parse import quote
 from src.utils.task_utils.loader import emulator
 from playwright_stealth import stealth_async
 from playwright.async_api import async_playwright, Error as PlaywrightError
@@ -85,11 +86,14 @@ async def collect_profile_endpoints(enabled=False, depth=None) -> bool:
     async with async_playwright() as p:
         emulator(message="scraping profile urls...", is_in_progress=True)
 
-        browser = await p.chromium.launch(headless=True,args=browser_args())
+        arguments = await browser_args()
+        view_port = await viewport()
+
+        browser = await p.chromium.launch(headless=True,args=arguments)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                        "Chrome/91.0.4472.124 Safari/537.36",
-            viewport=viewport()
+            viewport=view_port
         )
 
         page = await context.new_page()
@@ -113,7 +117,7 @@ async def collect_profile_endpoints(enabled=False, depth=None) -> bool:
                     csvwriter = csv.writer(csvfile)
                     csvwriter.writerow(['Endpoint'])  # Write the header every time
                     for endpoint in all_endpoints:
-                        updated_endpoint = f"https://www.goudengids.nl{endpoint}"
+                        updated_endpoint = f"https://www.goudengids.nl{quote(endpoint)}"
                         csvwriter.writerow([updated_endpoint])
                 custom_logger(f"Profile data saved to {csv_file_path}", log_type="info")
                 emulator(message="", is_in_progress=False)

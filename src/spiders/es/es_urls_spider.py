@@ -1,14 +1,15 @@
 import asyncio
 from pathlib import Path
 import re, random, csv
+from urllib.parse import quote
 from src.utils.task_utils.loader import emulator
 from playwright_stealth import stealth_async
+from headers.headers import Headers
 from playwright.async_api import async_playwright, Error as PlaywrightError
 from middlewares.errors.error_handler import handle_exceptions
 from src.utils.logger.logger import custom_logger, initialize_logging
 from src.utils.browser_launcher import browser_args, viewport
 from bs4 import BeautifulSoup
-
 
 initialize_logging()
 
@@ -70,54 +71,57 @@ def randomize_wait_time(min_time, max_time):
 
 @handle_exceptions
 async def es_collect_profile_endpoints(enabled=False, depth=None) -> bool:
-    if not enabled:
-        custom_logger("profile collection mode: off.", log_type="info")
+    try:
+
+        if not enabled:
+            custom_logger("profile collection mode: off.", log_type="info")
+            return False
+
+        endpoints = es_load_base_urls(depth)
+        if not endpoints:
+            custom_logger("No endpoints found", log_type="info")
+            return False
+
+        async with async_playwright() as p:
+            emulator(message="scraping profile urls...", is_in_progress=True)
+            headers = Headers()
+
+            arguments = await browser_args()
+            view_port = await viewport()
+
+            browser = await p.chromium.launch(
+                headless=True,
+                args=arguments
+            )
+            context = await browser.new_context(extra_http_headers=headers.es_profile_list(),viewport=view_port)
+            page = await context.new_page()
+            await stealth_async(page)
+
+            data_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'es_profile_urls'
+            data_dir.mkdir(parents=True, exist_ok=True)
+
+            for file_name, urls in endpoints:
+                csv_file_path = data_dir / f"es_{file_name}.csv"
+
+                all_endpoints = []
+                for url in urls:
+                    custom_logger(f"Processing url: {url}", log_type="info")
+                    extracted_endpoints = await es_process_url(page, url)
+                    all_endpoints.extend(extracted_endpoints)
+                    await asyncio.sleep(randomize_wait_time(0.5, 1.5))
+
+                if all_endpoints:
+                    with csv_file_path.open('w', newline='', encoding='utf-8') as csvfile:
+                        csvwriter = csv.writer(csvfile)
+                        csvwriter.writerow(['Endpoint'])  # Write the header every time
+                        for endpoint in all_endpoints:
+                            csvwriter.writerow([endpoint])
+                    custom_logger(f"Profile data saved to {csv_file_path}", log_type="info")
+                    emulator(message="", is_in_progress=False)
+
+        await browser.close()
+        custom_logger("Profile endpoint collection completed.", log_type="info")
+        return True
+    except Exception as e:
+        custom_logger(f"Something went wrong in <es_collect_profile_endpoints>\n {e}", log_type="warn")
         return False
-
-    endpoints = es_load_base_urls(depth)
-    if not endpoints:
-        custom_logger("No endpoints found", log_type="info")
-        return False
-
-    async with async_playwright() as p:
-        emulator(message="scraping profile urls...", is_in_progress=True)
-
-        browser = await p.chromium.launch(
-            headless=True,
-            args=browser_args()
-        )
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                       "Chrome/91.0.4472.124 Safari/537.36",
-            viewport=viewport()
-        )
-
-        page = await context.new_page()
-        await stealth_async(page)
-
-        data_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'es_profile_urls'
-        print('>>>>>>>>>>>>>>>> ',data_dir, '>>>>>>>>>>>>>>>')
-        data_dir.mkdir(parents=True, exist_ok=True)
-
-        for file_name, urls in endpoints:
-            csv_file_path = data_dir / f"es_{file_name}.csv"
-
-            all_endpoints = []
-            for url in urls:
-                custom_logger(f"Processing url: {url}", log_type="info")
-                extracted_endpoints = await es_process_url(page, url)
-                all_endpoints.extend(extracted_endpoints)
-                await asyncio.sleep(randomize_wait_time(0.5, 1.5))
-
-            if all_endpoints:
-                with csv_file_path.open('w', newline='', encoding='utf-8') as csvfile:
-                    csvwriter = csv.writer(csvfile)
-                    csvwriter.writerow(['Endpoint'])  # Write the header every time
-                    for endpoint in all_endpoints:
-                        csvwriter.writerow([endpoint])
-                custom_logger(f"Profile data saved to {csv_file_path}", log_type="info")
-                emulator(message="", is_in_progress=False)
-
-    await browser.close()
-    custom_logger("Profile endpoint collection completed.", log_type="info")
-    return True

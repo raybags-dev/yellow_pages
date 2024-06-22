@@ -2,7 +2,7 @@
 {
     "run_pipeline": true,
     "default_region": "",
-    "key_word_default": "doctores",
-    "depth": 2,
-    "country": "es"
+    "key_word_default": "advocaat",
+    "depth": "5",
+    "country": "nl"
 }
