@@ -1,14 +1,17 @@
 import asyncio
+import csv
+import random
 from pathlib import Path
-import re,random, csv
 from urllib.parse import quote
-from src.utils.task_utils.loader import emulator
-from playwright_stealth import stealth_async
-from playwright.async_api import async_playwright, Error as PlaywrightError
-from middlewares.errors.error_handler import handle_exceptions
-from src.utils.logger.logger import custom_logger, initialize_logging
-from src.utils.browser_launcher import browser_args, viewport
+
 from bs4 import BeautifulSoup
+from playwright.async_api import async_playwright, Error as PlaywrightError
+from playwright_stealth import stealth_async
+
+from middlewares.errors.error_handler import handle_exceptions
+from src.utils.browser_launcher import browser_args, viewport
+from src.utils.logger.logger import custom_logger, initialize_logging
+from src.utils.task_utils.loader import emulator
 
 initialize_logging()
 

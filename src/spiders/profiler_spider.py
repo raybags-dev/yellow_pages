@@ -158,60 +158,6 @@ class MainProfileProcessor:
         self.success_count += 1
         custom_logger(f"Saved profile data for {filename}. Total saved: {self.success_count}", log_type="info")
 
-    # @handle_exceptions
-    # async def process_product_endpoints(self, endpoints, save_to_s3=True, save_to_local=True, concurrency=4):
-    #     async with async_playwright() as p:
-    #         headers = Headers()
-    #         arguments = await browser_args()
-    #         view_port = await viewport()
-    #
-    #         browser = await p.chromium.launch(headless=True,args=arguments)
-    #         context = await browser.new_context(extra_http_headers=headers.get_profile_headers(),
-    #                                             viewport=view_port)
-    #
-    #         async def download_and_process_page(filename, url):
-    #             try:
-    #                 page = await context.new_page()
-    #                 custom_logger(f"Downloading in progress...", log_type="info")
-    #                 await page.goto(url)
-    #                 page_content = await page.content()
-    #                 profile_data = extract_profile_data(page_content)
-    #                 emulator(message="Processing page...", is_in_progress=True)
-    #                 if "error" in profile_data:
-    #                     emulator(is_in_progress=False)
-    #                     return {"url": url, "error": profile_data["error"], "message": profile_data["message"]}
-    #                 if profile_data:
-    #                     if save_to_s3:
-    #                         await self._save_to_s3(filename, profile_data)
-    #                     elif save_to_local:
-    #                         await self._save_to_local(filename, profile_data)
-    #                 emulator(is_in_progress=False)
-    #                 return profile_data
-    #             except Exception as e:
-    #                 custom_logger(f"Failed to process page {url}: {e}", log_type="error")
-    #                 return None
-    #
-    #         async def process_batch(batch):
-    #             tasks = [download_and_process_page(filename, url) for filename, url in batch]
-    #             results = await asyncio.gather(*tasks, return_exceptions=True)
-    #             return results
-    #
-    #         batch_size = concurrency
-    #         for i in range(0, len(endpoints), batch_size):
-    #             current_batch = endpoints[i:i + batch_size]
-    #             await process_batch(current_batch)
-    #
-    #         if self.retries:
-    #             custom_logger(f"Retrying {len(self.retries)} failed endpoints.", log_type="info")
-    #             await process_batch(self.retries)
-    #             self.retries.clear()
-    #
-    #         await context.close()
-    #         await browser.close()
-    #
-    #     custom_logger(f"Successfully processed {self.success_count} endpoints.")
-    #     return self.success_count > 0
-
     @handle_exceptions
     async def process_product_endpoints(self, endpoints, save_to_s3=True, save_to_local=True, concurrency=4):
         retries = 3
