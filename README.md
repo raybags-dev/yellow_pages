@@ -1,4 +1,6 @@
 # Yellow Pages (Supported Content: Netherlands & Spain)
+![Alt text](img/y-p.png)
+
 
 ## Overview
 
@@ -11,7 +13,7 @@ Yellow Pages is a web scraping project designed to extract business information 
 - Crawls and extracts, cleans, models and indexes search results.
 - Handles missing values with defaults.
 - Stores the collected data locally or in AWS S3.
-- Provides a clear easy configuration layer so you don't have to dig into code.
+- Provides a clear easy configuration layer, so you don't have to dig into code.
 
 ## Prerequisites
 
@@ -25,7 +27,7 @@ Yellow Pages is a web scraping project designed to extract business information 
 1. Clone the repository:
 
     ```sh
-    git clone https://github.com/yourusername/yellow-pages.git
+    git clone https://github.com/raybags-dev/yellow-pages.git
     cd yellow-pages
     ```
 
@@ -41,11 +43,11 @@ Yellow Pages is a web scraping project designed to extract business information 
 
 ## Usage
    - The application consists of 3 modules 
-     - Ochestrator: Handles initial search, and pagination
+     - Orchestrator: Handles initial search, and pagination
      - Downloader: Handles profile downloader for each individual profiles
      - Parser: Handles collected data procession to ready-save state
-   - All these modules can be run individually by anabling/disabling the `can_run` parameter OR all modules can be run asynchronously in a pipeline in which each application listens for a ready-signal from the other
-   - Logging is robbust but can be improved by piping it to an external service like like `AWS CloudWatch` 
+   - All these modules can be run individually by enabling/disabling the `can_run` parameter OR all modules can be run asynchronously in a pipeline in which each application listens for a ready-signal from the other
+   - Logging is robust but can be improved by piping it to an external service like `AWS CloudWatch` 
    - You can update configurations in the file below to control the above functional flow. 
 
 ```sh
