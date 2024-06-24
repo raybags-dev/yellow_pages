@@ -36,7 +36,7 @@ async def main():
                 else:
                     await collect_regional_search_endpoints(enabled=False)
                     await collect_profile_endpoints(enabled=False, depth=max_depth)
-                    await processor.run_nl_worker(enabled=False,  save_to_s3=False, save_to_local=True)
+                    await processor.run_nl_worker(enabled=True,  save_to_s3=False, save_to_local=True)
             except Exception as e:
                 custom_logger(f"An error occurred during NL execution: {e}", log_type="error")
             finally:
