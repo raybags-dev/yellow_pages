@@ -1,6 +1,4 @@
 import boto3
-import asyncio
-import io
 import os
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv

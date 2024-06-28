@@ -63,8 +63,7 @@ async def e_search_endpoints(enabled=False):
                     headless=True,
                     args=arguments
                 )
-                # print("arguments:>>>>>> ", arguments)
-                # print("view_port:>>>>>> ", view_port)
+
                 context = await browser.new_context(viewport=view_port)
 
                 page = await context.new_page()
@@ -119,7 +118,7 @@ async def e_search_endpoints(enabled=False):
 
         except PlaywrightError as e:
             retries -= 1
-            custom_logger(f"Playwright error occurred: {str(e)}. Retries left: {retries}", log_type="error")
+            custom_logger(f"Playwright error occurred: {str(e)}. Retries left: {retries}", log_type="warn")
             if retries == 0:
                 custom_logger("All retries exhausted. Please try again later or consider updating headers.",
                               log_type="error")

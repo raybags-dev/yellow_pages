@@ -1,8 +1,7 @@
-
 {
-  "run_pipeline": false,
+  "run_pipeline": true,
   "default_region": "",
-  "key_word_default": "advocaat",
-  "depth": "null",
+  "key_word_default": "abogado",
+  "depth": 2,
   "country": "nl"
 }

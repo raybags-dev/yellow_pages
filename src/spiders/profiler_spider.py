@@ -47,7 +47,7 @@ class MainProfileProcessor:
         profile_url_constructs = set()
         for csv_file in csv_files:
             if csv_file.stat().st_size == 0:
-                custom_logger(f"The file {csv_file.name} is empty.", log_type="warning")
+                custom_logger(f"The file {csv_file.name} is empty.", log_type="warn")
                 continue
 
             with csv_file.open(mode='r', newline='', encoding='utf-8') as file:
