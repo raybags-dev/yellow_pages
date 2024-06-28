@@ -5,7 +5,7 @@ import sys
 def update_requirements(remove_version=True):
     with fileinput.FileInput("requirements.txt", inplace=True, backup=".bak") as file:
         for line in file:
-            if line.strip().startswith("urllib3"):
+            if "urllib3" in line:
                 if remove_version:
                     print("urllib3")
                 else:
