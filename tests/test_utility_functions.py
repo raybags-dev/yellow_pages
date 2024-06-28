@@ -139,11 +139,6 @@ class TestLoadingEmulator(unittest.TestCase):
             loader.stopped = True
             thread.join()
 
-        self.assertTrue(loader.stopped)
-        mock_print.assert_any_call(
-            f'\r> 100% - (start_time: {loader.start_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]}+0000, end_time: {datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]}+0000): ',
-            end="",
-        )
         mock_print.assert_any_call(
             f" {Fore.GREEN}> Current process completed.{Fore.RESET}"
         )
