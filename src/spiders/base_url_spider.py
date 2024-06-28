@@ -127,15 +127,15 @@ async def collect_regional_search_endpoints(enabled=False):
 
         except PlaywrightError as e:
             retries -= 1
-            custom_logger(f"Playwright error occurred: {str(e)}. Retries left: {retries}", log_type="error")
+            custom_logger(f"Playwright error occurred: {str(e)}. Retries left: {retries}", log_type="warn")
             if retries == 0:
                 custom_logger("All retries exhausted. Please try again later or consider updating headers.",
-                              log_type="error")
+                              log_type="warn")
                 emulator(is_in_progress=False)
                 return False
             await asyncio.sleep(5)  # Wait before retrying
         except Exception as e:
-            custom_logger(f"Unexpected error occurred: {str(e)}", log_type="error")
+            custom_logger(f"Unexpected error occurred: {str(e)}", log_type="warn")
             emulator(is_in_progress=False)
             return False
         finally:

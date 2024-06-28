@@ -182,7 +182,7 @@ class EsMainProfileProcessor:
             if key and key not in existing_data:
                 await writer.writerow(data)
                 self.success_count += 1
-                custom_logger(f"Appended profile data for {filename}. Total saved: {self.success_count}",
+                custom_logger(f"Appended profile data for {filename}. Count: {self.success_count}",
                               log_type="info")
             else:
                 custom_logger(f"Duplicate entry found for {filename}, not appending.", log_type="info")

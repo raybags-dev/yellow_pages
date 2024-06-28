@@ -26,6 +26,7 @@ def es_load_base_urls(depth=None):
                 endpoints = [line.strip() for line in f.readlines()]
                 original_count = len(endpoints)
                 if depth is not None and depth > 0:
+                    print(depth)
                     endpoints = endpoints[:depth]  # Limit the number of endpoints based on the provided depth
                     custom_logger(f"Loaded {depth} profile endpoints from {file.name}", log_type="info")
                 else:
