@@ -1,4 +1,4 @@
-name: Run tests (yellow-pages-app) and Auto Merge to main
+name: Run auto tests (yellow-pages-app) and Auto Merge to main
 
 on:
   push:
@@ -80,6 +80,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install python-dotenv
+
+      - name: Modify requirements.txt for deployment
+        run: |
+          python modify_requirements.py remove
 
       - name: Install Heroku CLI
         run: |
