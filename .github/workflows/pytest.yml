@@ -89,12 +89,21 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Deploy to Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      - name: Set Git configuration
         run: |
-          heroku git:remote -a yellow-pages-profiler
-          git push heroku main
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+
+      - name: Initialize Git repository
+        run: |
+          git init
+          git remote add heroku https://git.heroku.com/yellow-pages-profiler.git
+
+      - name: Deploy to Heroku
+        run: |
+          git add .
+          git commit -m "Deploying to Heroku"
+          git push heroku main:main
 
       - name: Set Heroku environment variables
         env:
