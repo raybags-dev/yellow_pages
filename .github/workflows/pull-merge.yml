@@ -1,0 +1,33 @@
+name: Auto Merge to main
+
+on:
+  push:
+    branches:
+      - ray__staging
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Merge Request and Merge
+        run: |
+          # Create the merge request
+          MR_RESPONSE=$(curl -X POST -H "Authorization: token ${{ secrets.AUTO_MERGE_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/pulls -d "{\"title\": \"Automated MR from ray__staging to main\", \"head\": \"ray__staging\", \"base\": \"main\"}")
+          MR_NUMBER=$(echo $MR_RESPONSE | jq -r ".number")
+
+          # Check if MR was successfully created
+          if [ -z "$MR_NUMBER" ]; then
+            echo "Failed to create Merge Request"
+            exit 1
+          fi
+
+          # Merge the MR
+          curl -X PUT -H "Authorization: token ${{ secrets.AUTO_MERGE_TOKEN }}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/pulls/$MR_NUMBER/merge
+
+      - name: Delete ray__staging branch
+        run: |
+          curl -X DELETE -H "Authorization: token ${{ secrets.AUTO_MERGE_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/git/refs/heads/ray__staging

@@ -85,6 +85,9 @@ class Headers:
 
         if additional_headers:
             self.base_headers.update(additional_headers)
+            self.profile_headers.update(additional_headers)
+            self.es_url_headers.update(additional_headers)
+            self.es_profile_list_headers.update(additional_headers)
 
     def get_headers(self):
         self.base_headers["user-agent"] = random.choice(user_agents)
