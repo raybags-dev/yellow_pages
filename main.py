@@ -98,15 +98,12 @@ async def main():
             finally:
                 emulator(is_in_progress=False)
         else:
-            custom_logger(
-                "Sorry this country is not supported - opts: (nl|es)", log_type="warn"
-            )
+            custom_logger("Country not supported - opts: (nl|es)", log_type="warn")
             sys.exit(1)
 
     except Exception as e:
         custom_logger(
-            f"An unexpected error occurred in the main function: {
-                      e}",
+            f"unexpected error occurred in the main function: {e}",
             log_type="error",
         )
         sys.exit(1)
